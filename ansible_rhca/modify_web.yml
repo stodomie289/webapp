@@ -1,0 +1,37 @@
+---
+- name: deploying changes at backend application
+  hosts: web_servers
+  serial:
+    - 1
+  become: yes
+  pre_tasks:
+    - debug:
+        msg: "http://{{ inventory_hostname }}:80"
+    - name: disable webservers at haproxy
+      haproxy: 
+        backend: app
+        host: "{{ inventory_hostname }}"
+        state: disabled
+      delegate_to: load_balancer
+
+  roles:
+    - role: webapp
+ 
+  post_tasks:
+    - debug:
+         msg: "http://{{ inventory_hostname }}:80"
+    - name: enable back the web proxy
+      haproxy: 
+        backend: app
+        host: "{{ inventory_hostname }}"
+        state: enabled
+      delegate_to: load_balancer
+    - name: smoke test
+      uri:
+        url: "http://{{ inventory_hostname }}:80"
+        return_content: yes
+        method: GET
+      register: smoke
+      delegate_to: load_balancer
+    - debug:
+        var: smoke

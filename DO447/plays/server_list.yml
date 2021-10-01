@@ -1,0 +1,16 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: create server list
+      template:
+        src: server_list.j2
+        dest: /etc/server_list.txt
+        mode: '0600'
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['database'] }}"
+    - name: set selinux fcontxt
+      sefcontext:
+        target: /etc/server_list.txt
+        setype: net_conf_t
+        state: present

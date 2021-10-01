@@ -1,0 +1,21 @@
+---
+- hosts: all
+  become: yes
+  remote_user: root
+  tasks:
+    - name: create user
+      user:
+        name: eric_rhca
+        state: present
+        groups: wheel
+        append: yes
+    - name: create authorized key
+      authorized_key:
+        user: eric_rhca
+        key: "{{ lookup('file', '/root/.ssh/id_rsa.pub')}}"
+
+    - name: no sudo passwd
+      lineinfile:
+        path: /etc/sudoers
+        line: 'eric_rhca ALL=(ALL) NOPASSWD:ALL'
+        state: present

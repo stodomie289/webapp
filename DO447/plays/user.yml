@@ -1,0 +1,50 @@
+---
+- hosts: all
+  become: yes
+  vars_files:
+    - ./vars/user_list.yml
+    - ./secret.yml
+  tasks:
+    - name: create user if uid start with 1 and in webservers
+      user: 
+        name: "{{ item.username }}"
+        state: present
+        uid: "{{ item.uid }}"
+        groups: wheel
+        append: yes
+        shell: /bin/bash
+        password: "{{ user_password | password_hash('sha512') }}"
+      when: 
+        - inventory_hostname in groups['webservers']
+        - item.uid|string|first == '1'
+      loop: "{{ users }}"
+    - name: making authorized key
+      authorized_key:
+        user: "{{ item.username }}"
+        key: "{{ lookup('file', '/root/.ssh/id_rsa.pub') }}"
+      when: 
+        - inventory_hostname in groups['webservers']
+        - item.uid|string|first == '1'
+      loop: "{{ users }}"  
+
+    - name: create user if uid start with 2 and in webservers
+      user: 
+        name: "{{ item.username }}"
+        state: present
+        uid: "{{ item.uid }}"
+        groups: wheel
+        append: yes
+        shell: /bin/bash
+        password: "{{ user_password | password_hash('sha512') }}"
+      when: 
+        - inventory_hostname in groups['database']
+        - item.uid|string|first == '2'
+      loop: "{{ users }}"
+    - name: making authorized key
+      authorized_key:
+        user: "{{ item.username }}"
+        key: "{{ lookup('file', '/root/.ssh/id_rsa.pub') }}"
+      when: 
+        - inventory_hostname in groups['database']
+        - item.uid|string|first == '2'
+      loop: "{{ users }}"

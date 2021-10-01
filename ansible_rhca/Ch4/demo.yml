@@ -1,0 +1,41 @@
+---
+- name: Demo of Nested Loop
+  hosts: all
+  gather_facts: no
+  vars_files:
+    - user.yml
+  vars:
+    paul_pass: test
+    john_pass: test
+
+  tasks:
+    - name: Extract the valu of nested items
+      debug: 
+        msg: The value for user is "{{ item.0.name }}" and value for the key in the book is "{{ lookup('list', item.1) }}"
+      loop: "{{ users | subelements('authorized') }}"
+    - name: similar extraction
+      debug:
+        msg: The value for user is "{{ item.0.name }}" and value for the key in the book is "{{ lookup('list', item.1) }}"
+      with_subelements:
+        - "{{ users }}"
+        - authorized
+    - name: extract the value
+      debug:
+        msg: the value for the variable is "{{ users | map(attribute='mysql') | list }}"
+  #    loop: "{{ users }}"
+  #
+    - name:
+      set_fact:
+        mysql_fact: "{{ users | map(attribute='mysql') | list }}"
+    - debug:
+        msg: "{{ mysql_fact }}"
+    - name: extracting more
+      debug:
+        msg: "{{ mysql_fact | map(attribute='hosts') | list }}"
+    - name: 
+      set_fact: 
+        mysql_host_fact:  "{{ mysql_fact | map(attribute='hosts') | list }}"
+    - name: Final 
+      debug: 
+      #var: "{{ mysql_host_fact.1.0 }}"
+        msg: "{{ mysql_host_fact.0.2 }}"

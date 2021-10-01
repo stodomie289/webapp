@@ -1,0 +1,35 @@
+---
+# tasks file for sample-apache
+- name: install needed packages
+  yum:
+    name:
+      - httpd
+      - mod_ssl
+      - php
+    state: latest
+
+  - name: make sure apache and firewalld running
+    systemd:
+      name: 
+        - httpd
+        - firewalld
+      enabled: yes
+      state: started
+
+   - name: open firewall
+     firewalld:
+       port: "{{ item }}"
+       state: present
+       enabled: yes
+       immediate: yes
+     loop: 
+       - '80/tcp'
+       - '443/tcp'
+
+    - name: put template
+      template:
+        dest: /var/www/html/index.html
+        src: index.html.j2
+      notify: restart apache
+
+

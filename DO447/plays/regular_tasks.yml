@@ -1,0 +1,9 @@
+---
+- hosts: proxy
+  become: yes
+  tasks:
+    - name: create cron
+      cron:
+        job: "date >> /var/log/time.log"
+        user: root
+        minute: 0

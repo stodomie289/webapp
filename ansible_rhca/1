@@ -1,0 +1,8 @@
+---
+- hosts: localhost
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: read output of query lines
+      debug:
+        msg: "{{ query('lines', 'ls /tmp') }}"

@@ -1,0 +1,23 @@
+--- 
+- name: make a group
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: group the hosts in inventory according to distro
+      group_by:
+        key: distro_{{ ansible_distribution }}
+
+- name: show all Centos
+  hosts: distro_CentOS
+  gather_facts: false
+  tasks: 
+    - name: show all CentOS
+      debug:
+        msg: "{{ inventory_hostname }}"
+- name: show all Redhat
+  hosts: distro_RedHat
+  gather_facts: false
+  tasks:
+    - name: show all redhat hosts
+      debug:
+        msg: "{{ inventory_hostname }}"

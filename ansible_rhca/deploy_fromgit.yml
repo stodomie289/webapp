@@ -1,0 +1,58 @@
+---
+- hosts: web_servers
+  become: yes
+  vars:
+    - webdir: /var/www/html
+  tasks:
+    - name: create a tmp dir
+      tempfile:
+        state: directory
+        prefix: repo_
+      run_once: yes
+      delegate_to: localhost
+      register: tmpresult
+    - name: get the path
+      set_fact:
+        localdir: "{{ tempresult.path }}"
+
+    - name: clone git repo
+      git:
+        repo: https://github.com/stodomie289/webapp.git
+        dest: "{{ localdir }}"
+      run_once: yes
+      delegate_to: localhost
+      run_once: yes
+
+    - name: get the files from local
+      set_fact: 
+         localdir_files: "{{ query('fileglob', localdir + '/*') | map('relpath', localdir) | list }}"
+    - name: show the fies
+      debug:
+        msg: "{{ localdir_files }}"
+
+    - name: get all files in the remote dir
+      find:
+        paths: "{{ webdir }}"
+        file_type: file
+      register: remoteresult
+
+    - name: get files from remote
+      set_fact:
+        remotedir_files: "{{ remoteresult.files | map(attribute='path') | map('relpath', webdir)| list }}"
+    - name: show all local files
+      debug:
+        msg: "{{ remotedir_files }}"
+
+    - name: remove all not needed files
+      file:
+        path: "{{ webdir }}/{{ item }}"
+        state: absent
+      loop: "{{ remotedir_files | difference(localdir_files) }}"
+
+    - name: hapter5/update-management/roles/webapp/tasks/main.yml
+      copy:
+        dest: "{{ webdir }}"
+        src: " {{ webdir }}/{{ item }}"
+      loop: "{{ localdir_files }}"
+
+
