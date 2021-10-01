@@ -6,4 +6,4 @@ webserver1 ansible_host=192.168.0.11
 webserver2 ansible_host=192.168.0.12
 
 [local]
-localhost ansible_become=false ansible_user=awx
+localhost ansible_become=false ansible_user=automation
