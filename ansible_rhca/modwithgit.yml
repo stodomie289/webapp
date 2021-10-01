@@ -19,6 +19,7 @@
       set_fact:
         localdir: "{{ tmpresult.path }}"
       run_once: yes
+
     - name: clone from git
       git:
         repo: https://github.com/stodomie289/webapp.git
@@ -29,6 +30,8 @@
     - name: get the local files
       set_fact:
         localdir_files: "{{ query('fileglob', localdir + '/*') | map('relpath', localdir) | list }}"
+      delegate_to: localhost
+
     - name: local files
       debug: 
         msg: "{{ localdir_files }}"
