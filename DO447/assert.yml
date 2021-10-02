@@ -1,9 +1,0 @@
----
-- hosts: all
-  become: yes
-  tasks:
-    - name: assert sample 
-      assert:  
-        that: "ansible_os_family == 'RedHat'" 
-      ignore_errors: true
-             
